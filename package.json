@@ -24,9 +24,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:jevakallio.vscode-hacker-typer.recordMacro",
-    "onCommand:jevakallio.vscode-hacker-typer.playMacro",
-    "onCommand:jevakallio.vscode-hacker-typer.deleteMacro"
+    "workspaceContains:**/.exconfig"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -112,6 +110,8 @@
     "@types/promise-queue": "^2.2.0"
   },
   "dependencies": {
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
     "promise-queue": "^2.2.5",
     "vscode-cache": "^0.3.0"
   }

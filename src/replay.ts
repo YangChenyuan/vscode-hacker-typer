@@ -12,8 +12,11 @@ let isEnabled = false;
 let currentBuffer: buffers.Buffer | undefined;
 
 export function start(context: vscode.ExtensionContext) {
+
   const storage = Storage.getInstance(context);
   const items = storage.list();
+  items.map(item => item.name)
+
   vscode.window.showQuickPick(items.map(item => item.name)).then(picked => {
     if (!picked) {
       return;
@@ -109,7 +112,7 @@ export function onType({ text }: { text: string }) {
         })
     );
   } else {
-    vscode.commands.executeCommand("default:type", { text });
+    vscode.commands.executeCommand("default:type", { text }); // TODO: type is a command
   }
 }
 

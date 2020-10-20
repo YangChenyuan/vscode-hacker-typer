@@ -56,6 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(record, play, type, backspace, remove);
+
+  Recorder.register(context)();
+  vscode.window.showInformationMessage("Recorder is active!");
 }
 
 // this method is called when your extension is deactivated

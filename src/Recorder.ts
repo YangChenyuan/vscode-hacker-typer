@@ -39,19 +39,6 @@ export default class Recorder {
       subscriptions
     );
 
-    const insertNamedStop = vscode.commands.registerCommand(
-      "jevakallio.vscode-hacker-typer.insertNamedStop",
-      this.insertNamedStop,
-      this
-    );
-
-    const insertStop = vscode.commands.registerCommand(
-      "jevakallio.vscode-hacker-typer.insertStop",
-      () => {
-        this.insertStop(null);
-      }
-    );
-
     const save = vscode.commands.registerCommand(
       "jevakallio.vscode-hacker-typer.saveMacro",
       () => {
@@ -63,8 +50,6 @@ export default class Recorder {
     this._textEditor = vscode.window.activeTextEditor;
     this._disposable = vscode.Disposable.from(
       ...subscriptions,
-      insertNamedStop,
-      insertStop,
       save
     );
 
@@ -83,28 +68,6 @@ export default class Recorder {
       content,
       language,
       selections
-    });
-  }
-
-  private insertNamedStop() {
-    vscode.window
-      .showInputBox({
-        prompt: "What do you want to call your stop point?",
-        placeHolder: "Type a name or ENTER for unnamed stop point"
-      })
-      .then(name => {
-        this.insertStop(name || null);
-      });
-  }
-
-  private insertStop(name: string | null) {
-    buffers.insert({
-      stop: {
-        name: name || null
-      },
-      changes: null,
-      selections: null,
-      position: this._buffers++
     });
   }
 
@@ -132,6 +95,14 @@ export default class Recorder {
       });
   }
 
+  public saveToFile() {
+    this._storage.save({
+      name: String(Date.now()),
+      description: "",
+      buffers: buffers.all()
+    })
+  }
+
   private onDidChangeTextDocument(e: vscode.TextDocumentChangeEvent) {
     // @TODO: Gets called while playing -- need to stop recording once over
 
@@ -146,6 +117,9 @@ export default class Recorder {
 
     // Only allow recording to one active editor at a time
     // Breaks when you leave but that's fine for now.
+
+    // vscode.window.showWarningMessage("Selection changes!");
+
     if (e.textEditor !== this._textEditor) {
       return;
     }
