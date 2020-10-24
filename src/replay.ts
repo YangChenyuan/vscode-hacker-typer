@@ -11,6 +11,24 @@ const replayQueue = new Queue(replayConcurrency, replayQueueMaxSize);
 let isEnabled = false;
 let currentBuffer: buffers.Buffer | undefined;
 
+function autoReplay() {
+  if (isEnabled) {
+    replayQueue.add(
+      () =>
+        new Promise((resolve, reject) => {
+          try {
+            advanceBuffer(resolve, "a");
+          } catch (e) {
+            console.log(e);
+            reject(e);
+          }
+        })
+    );
+
+    setTimeout(()=>{autoReplay()}, 100);
+  }
+}
+
 export function start(context: vscode.ExtensionContext) {
 
   const storage = Storage.getInstance(context);
@@ -40,6 +58,8 @@ export function start(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage(
       `Now playing ${buffers.count()} buffers from ${macro.name}!`
     );
+
+    setTimeout(() => {autoReplay()}, 100);
   });
 }
 

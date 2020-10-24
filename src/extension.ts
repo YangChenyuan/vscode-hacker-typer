@@ -45,9 +45,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // @TODO dispose
-  let type = vscode.commands.registerCommand("type", replay.onType);
-
   // @TODO use registerTextEditorCommand instead?
   // https://code.visualstudio.com/docs/extensionAPI/vscode-api
   let backspace = vscode.commands.registerCommand(
@@ -55,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
     replay.onBackspace
   );
 
-  context.subscriptions.push(record, play, type, backspace, remove);
+  context.subscriptions.push(record, play, backspace, remove);
 
   Recorder.register(context)();
   vscode.window.showInformationMessage("Recorder is active!");
