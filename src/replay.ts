@@ -10,13 +10,17 @@ const replayQueue = new Queue(replayConcurrency, replayQueueMaxSize);
 
 let isEnabled = false;
 let currentBuffer: buffers.Buffer | undefined;
+let initialContent: string;
 
 function autoReplay() {
   if (isEnabled) {
+    // console.log("replay0. Queue length: " + replayQueue.getQueueLength() + ". Pending length: " + replayQueue.getPendingLength());
     replayQueue.add(
       () =>
         new Promise((resolve, reject) => {
           try {
+            // console.log("replay1");
+            setTimeout(()=>{autoReplay()}, 100);
             advanceBuffer(resolve, "a");
           } catch (e) {
             console.log(e);
@@ -24,8 +28,6 @@ function autoReplay() {
           }
         })
     );
-
-    setTimeout(()=>{autoReplay()}, 100);
   }
 }
 
@@ -166,12 +168,13 @@ function advanceBuffer(done: () => void, userInput: string) {
 
   if (!editor) {
     vscode.window.showErrorMessage("No active editor");
-    return;
+    return done();
   }
 
-  if (!buffer) {
-    vscode.window.showErrorMessage("No buffer to advance");
-    return;
+  if (!buffer || !isEnabled) {
+    disable();
+    // vscode.window.showErrorMessage("No buffer to advance");
+    return done();
   }
 
   if (buffers.isStopPoint(buffer)) {
@@ -184,19 +187,38 @@ function advanceBuffer(done: () => void, userInput: string) {
 
   const { changes, selections } = <buffers.Frame>buffer;
 
-  const updateSelectionAndAdvanceToNextBuffer = () => {
+  const  updateSelectionAndAdvanceToNextBuffer = () => {
     if (selections.length) {
       updateSelections(selections, editor);
     }
-
+      
+    let position = buffer.position;
     currentBuffer = buffers.get(buffer.position + 1);
 
     // Ran out of buffers? Disable type capture.
-    if (!currentBuffer) {
+    if (currentBuffer == undefined || position >= currentBuffer.position) {
       disable();
+      // const existingEditor = editor;
+      // await existingEditor.edit(edit => {
+      //   // update initial file content
+      //   const l = existingEditor.document.lineCount;
+      //   const range = new vscode.Range(
+      //     new vscode.Position(0, 0),
+      //     new vscode.Position(
+      //       l,
+      //       Math.max(
+      //         0,
+      //         existingEditor.document.lineAt(Math.max(0, l - 1)).text.length - 1
+      //       )
+      //     )
+      //   );
+
+      //   edit.delete(range);
+      //   edit.insert(new vscode.Position(0, 0), initialContent);
+      // });
     }
 
-    done();
+    return done();
   };
 
   if (changes && changes.length > 0) {

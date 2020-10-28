@@ -10,6 +10,8 @@ export default class Recorder {
   private _buffers = 0;
   private _currentChanges: vscode.TextDocumentContentChangeEvent[] = [];
   private _storage: Storage;
+  
+  public static isAutoSave: boolean;
 
   public static register(context: vscode.ExtensionContext) {
     return () => {
@@ -19,6 +21,9 @@ export default class Recorder {
       vscode.window.showInformationMessage("Hacker Typer is now recording!");
       const recorder = new Recorder(Storage.getInstance(context));
       context.subscriptions.push(recorder);
+      
+      Recorder.isAutoSave = true;
+      recorder.autoSave(); 
     };
   }
 
@@ -95,12 +100,27 @@ export default class Recorder {
       });
   }
 
-  public saveToFile() {
-    this._storage.save({
-      name: String(Date.now()),
+  private timeout(ms: number) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private mySave(name: string) {
+    return this._storage.save({
+      name,
       description: "",
       buffers: buffers.all()
     })
+  }
+
+  public autoSave() {
+    if (Recorder.isAutoSave) {
+      Promise.all([
+        this.mySave(String(Date.now())).then(macro => {
+          console.log(`Saved ${macro.buffers.length} buffers under "${macro.name}".`)
+        }),
+        this.timeout(10000)
+      ]).then(() => this.autoSave()); 
+    }
   }
 
   private onDidChangeTextDocument(e: vscode.TextDocumentChangeEvent) {
