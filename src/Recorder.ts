@@ -22,7 +22,7 @@ export default class Recorder {
       const recorder = new Recorder(Storage.getInstance(context));
       context.subscriptions.push(recorder);
       
-      Recorder.isAutoSave = true;
+      // Recorder.isAutoSave = true;
       recorder.autoSave(); 
     };
   }
