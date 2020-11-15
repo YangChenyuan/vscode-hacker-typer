@@ -26,7 +26,7 @@ export interface SerializedStartingPoint {
   content: string;
   language: string;
   position: number;
-  selections: SerializedSelection[];
+  // selections: SerializedSelection[];
 }
 export interface SerializedStopPoint {
   stop: { name: string | null };
@@ -34,7 +34,7 @@ export interface SerializedStopPoint {
 }
 export interface SerializedFrame {
   changes: SerializedChangeEvent[];
-  selections: SerializedSelection[];
+  // selections: SerializedSelection[];
   position: number;
 }
 
@@ -92,13 +92,13 @@ export function rehydrateBuffer(serialized: SerializedBuffer): buffers.Buffer {
       position: serialized.position,
       content: serialized.content,
       language: serialized.language,
-      selections: serialized.selections.map(rehydrateSelection)
+      // selections: serialized.selections.map(rehydrateSelection)
     };
   }
 
   return {
     position: serialized.position,
     changes: serialized.changes.map(rehydrateChangeEvent),
-    selections: serialized.selections.map(rehydrateSelection)
+    // selections: serialized.selections.map(rehydrateSelection)
   };
 }

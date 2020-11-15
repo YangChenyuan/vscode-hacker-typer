@@ -36,11 +36,11 @@ export default class Recorder {
       subscriptions
     );
 
-    let e2 = vscode.window.onDidChangeTextEditorSelection(
-      this.onDidChangeTextEditorSelection,
-      this,
-      subscriptions
-    );
+    // let e2 = vscode.window.onDidChangeTextEditorSelection(
+    //   this.onDidChangeTextEditorSelection,
+    //   this,
+    //   subscriptions
+    // );
 
     // For active editor change
     let e3 = vscode.window.onDidChangeActiveTextEditor(
@@ -68,7 +68,7 @@ export default class Recorder {
       ...subscriptions,
       save,
       e1,
-      e2,
+      // e2,
       e3,
       e4
     );
@@ -80,14 +80,14 @@ export default class Recorder {
 
   private insertStartingPoint(textEditor: vscode.TextEditor) {
     const content = textEditor.document.getText();
-    const selections = textEditor.selections;
+    // const selections = textEditor.selections;
     const language = textEditor.document.languageId;
 
     buffers.insert({
       position: this._buffers++,
       content,
       language,
-      selections
+      // selections
     });
   }
 
@@ -129,37 +129,48 @@ export default class Recorder {
 
     // store changes, selection change will commit
     // this._currentChanges.push(...e.contentChanges);
-    this._currentChanges = e.contentChanges;
-  }
 
-  private onDidChangeTextEditorSelection(
-    e: vscode.TextEditorSelectionChangeEvent
-  ) {
-    // @TODO: Gets called while playing -- need to stop recording once over
+    let changes = this._currentChanges;
 
-    // Only allow recording to one active editor at a time
-    // Breaks when you leave but that's fine for now.
-
-    console.warn("selection change");
-
-    if (e.textEditor !== this._textEditor) {
-      return;
-    }
-
-    const changes = this._currentChanges;
-    const selections = e.selections || [];
     this._currentChanges = [];
-
     buffers.insert({
       changes,
-      selections,
       position: this._buffers++
-    });
+    })
 
-    if (buffers.count() >= 15) {
+    if (this._buffers >= 15) {
       this.activeChange();
     }
   }
+
+  // private onDidChangeTextEditorSelection(
+  //   e: vscode.TextEditorSelectionChangeEvent
+  // ) {
+  //   // @TODO: Gets called while playing -- need to stop recording once over
+
+  //   // Only allow recording to one active editor at a time
+  //   // Breaks when you leave but that's fine for now.
+
+  //   console.warn("selection change");
+
+  //   if (e.textEditor !== this._textEditor) {
+  //     return;
+  //   }
+
+  //   const changes = this._currentChanges;
+  //   const selections = e.selections || [];
+  //   this._currentChanges = [];
+
+  //   buffers.insert({
+  //     changes,
+  //     selections,
+  //     position: this._buffers++
+  //   });
+
+  //   if (buffers.count() >= 15) {
+  //     this.activeChange();
+  //   }
+  // }
 
   dispose() {
     if (this._disposable) {
