@@ -10,7 +10,7 @@ const replayQueue = new Queue(replayConcurrency, replayQueueMaxSize);
 
 let isEnabled = false;
 let currentBuffer: buffers.Buffer | undefined;
-let initialContent: string;
+// let initialContent: string;
 
 function autoReplay() {
   if (isEnabled) {
@@ -195,7 +195,7 @@ function advanceBuffer(done: () => void, userInput: string) {
     let position = buffer.position;
     currentBuffer = buffers.get(buffer.position + 1);
 
-    console.log("post position: "+position+", current position: "+currentBuffer.position+", length: "+buffers.count());
+    console.log("post position: "+position+", current position: "+currentBuffer?.position+", length: "+buffers.count());
 
     // Ran out of buffers? Disable type capture.
     if (currentBuffer == undefined || position >= currentBuffer.position) {

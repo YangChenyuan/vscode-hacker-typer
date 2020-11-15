@@ -21,28 +21,34 @@ export default class Recorder {
       vscode.window.showInformationMessage("Hacker Typer is now recording!");
       const recorder = new Recorder(Storage.getInstance(context));
       context.subscriptions.push(recorder);
-      
-      // Recorder.isAutoSave = true;
-      recorder.autoSave(); 
     };
   }
+
 
   constructor(storage: Storage) {
     this._storage = storage;
 
     let subscriptions: vscode.Disposable[] = [];
 
-    vscode.workspace.onDidChangeTextDocument(
+    let e1 = vscode.workspace.onDidChangeTextDocument(
       this.onDidChangeTextDocument,
       this,
       subscriptions
     );
 
-    vscode.window.onDidChangeTextEditorSelection(
+    let e2 = vscode.window.onDidChangeTextEditorSelection(
       this.onDidChangeTextEditorSelection,
       this,
       subscriptions
     );
+
+    // For active editor change
+    let e3 = vscode.window.onDidChangeActiveTextEditor(
+      this.activeChange,
+      this,
+      subscriptions
+    );
+
 
     const save = vscode.commands.registerCommand(
       "jevakallio.vscode-hacker-typer.saveMacro",
@@ -55,7 +61,10 @@ export default class Recorder {
     this._textEditor = vscode.window.activeTextEditor;
     this._disposable = vscode.Disposable.from(
       ...subscriptions,
-      save
+      save,
+      e1,
+      e2,
+      e3
     );
 
     if (this._textEditor) {
@@ -91,17 +100,14 @@ export default class Recorder {
               buffers: buffers.all()
             })
             .then(macro => {
-              vscode.window.showInformationMessage(
+              console.log(
                 `Saved ${macro.buffers.length} buffers under "${macro.name}".`
               );
               command.dispose();
+              this.dispose();
             });
         }
       });
-  }
-
-  private timeout(ms: number) {
-      return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private mySave(name: string) {
@@ -110,17 +116,6 @@ export default class Recorder {
       description: "",
       buffers: buffers.all()
     })
-  }
-
-  public autoSave() {
-    if (Recorder.isAutoSave) {
-      Promise.all([
-        this.mySave(String(Date.now())).then(macro => {
-          console.log(`Saved ${macro.buffers.length} buffers under "${macro.name}".`)
-        }),
-        this.timeout(10000)
-      ]).then(() => this.autoSave()); 
-    }
   }
 
   private onDidChangeTextDocument(e: vscode.TextDocumentChangeEvent) {
@@ -159,5 +154,14 @@ export default class Recorder {
     if (this._disposable) {
       this._disposable.dispose();
     }
+  }
+
+  activeChange() {
+    let fileName = this._textEditor?.document?.fileName ?? "no-file";
+    this.mySave(fileName + String(Date.now())).then(macro => {
+      console.log(`Saved ${macro.buffers.length} buffers under "${macro.name}".`)
+      this.dispose();
+      vscode.commands.executeCommand("jevakallio.vscode-hacker-typer.recordMacro");
+    })
   }
 }
