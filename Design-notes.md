@@ -7,6 +7,9 @@ For different file, use some like `onActiveDocumentChange` event handler to save
 - `workspace.onDidSaveTextDocument`
 - `window.onDidChangeActiveTextEditor`
 - an event fired when workspace will be closed. (To be done)
+- Extensions can export a `deactivate` method along with their activate method that will be invoked when VS Code is shutdown
+
+Take `contentChange` into account (exclude `selectionChange`)
 
 _problem: too many changes without typing_ (can be ignored)
 
@@ -27,3 +30,9 @@ Disable record when replaying.
 11.15
 
 Now problem is switch betweeen record and replay.
+
+---
+
+## Problem
+
+`tsc` version problem: typescript 3.7+ support `?.` operation.

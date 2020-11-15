@@ -18,7 +18,7 @@ export default class Recorder {
       // reset global buffer
       buffers.clear();
 
-      vscode.window.showInformationMessage("Hacker Typer is now recording!");
+      console.log("RECORDING!");
       const recorder = new Recorder(Storage.getInstance(context));
       context.subscriptions.push(recorder);
     };
@@ -49,6 +49,11 @@ export default class Recorder {
       subscriptions
     );
 
+    let e4 = vscode.workspace.onDidSaveTextDocument(
+      this.activeChange,
+      this,
+      subscriptions
+    );
 
     const save = vscode.commands.registerCommand(
       "jevakallio.vscode-hacker-typer.saveMacro",
@@ -64,7 +69,8 @@ export default class Recorder {
       save,
       e1,
       e2,
-      e3
+      e3,
+      e4
     );
 
     if (this._textEditor) {
@@ -122,6 +128,7 @@ export default class Recorder {
     // @TODO: Gets called while playing -- need to stop recording once over
 
     // store changes, selection change will commit
+    // this._currentChanges.push(...e.contentChanges);
     this._currentChanges = e.contentChanges;
   }
 
@@ -133,7 +140,7 @@ export default class Recorder {
     // Only allow recording to one active editor at a time
     // Breaks when you leave but that's fine for now.
 
-    // vscode.window.showWarningMessage("Selection changes!");
+    console.warn("selection change");
 
     if (e.textEditor !== this._textEditor) {
       return;
@@ -148,6 +155,10 @@ export default class Recorder {
       selections,
       position: this._buffers++
     });
+
+    if (buffers.count() >= 15) {
+      this.activeChange();
+    }
   }
 
   dispose() {
@@ -158,10 +169,10 @@ export default class Recorder {
 
   activeChange() {
     let fileName = this._textEditor?.document?.fileName ?? "no-file";
-    this.mySave(fileName + String(Date.now())).then(macro => {
+    this.mySave(fileName + "&" + String(Date.now())).then(macro => {
       console.log(`Saved ${macro.buffers.length} buffers under "${macro.name}".`)
       this.dispose();
       vscode.commands.executeCommand("jevakallio.vscode-hacker-typer.recordMacro");
-    })
+    });
   }
 }

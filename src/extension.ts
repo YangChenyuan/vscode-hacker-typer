@@ -45,19 +45,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // let enable = vscode.commands.registerCommand(
-  //   "jevakallio.vscode-hacker-typer.enableAutoSave",
-  //   () => {
-  //     Recorder.isAutoSave = true;
-  //   }
-  // );
-
-  // let disable = vscode.commands.registerCommand(
-  //   "jevakallio.vscode-hacker-typer.disableAutoSave",
-  //   () => {
-  //     Recorder.isAutoSave = false;
-  //   }
-  // );
   // @TODO use registerTextEditorCommand instead?
   // https://code.visualstudio.com/docs/extensionAPI/vscode-api
   let backspace = vscode.commands.registerCommand(
