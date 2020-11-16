@@ -140,7 +140,7 @@ export default class Recorder {
     // Only allow recording to one active editor at a time
     // Breaks when you leave but that's fine for now.
 
-    console.warn("selection change");
+    // console.warn("selection change");
 
     if (e.textEditor !== this._textEditor) {
       return;
