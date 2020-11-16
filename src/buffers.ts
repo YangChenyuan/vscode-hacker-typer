@@ -9,7 +9,6 @@ type WithPosition = {
 export type StartingPoint = WithPosition & {
   content: string;
   language: string;
-  // selections: vscode.Selection[];
 };
 
 export type StopPoint = WithPosition & {
@@ -20,7 +19,6 @@ export type StopPoint = WithPosition & {
 
 export type Frame = WithPosition & {
   changes: vscode.TextDocumentContentChangeEvent[];
-  // selections: vscode.Selection[];
 };
 
 export type Buffer = StartingPoint | StopPoint | Frame;

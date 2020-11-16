@@ -15,18 +15,10 @@ interface SerializedChangeEvent {
   text: string;
 }
 
-interface SerializedSelection {
-  start: SerializedPosition;
-  end: SerializedPosition;
-  active: SerializedPosition;
-  anchor: SerializedPosition;
-}
-
 export interface SerializedStartingPoint {
   content: string;
   language: string;
   position: number;
-  // selections: SerializedSelection[];
 }
 export interface SerializedStopPoint {
   stop: { name: string | null };
@@ -34,7 +26,6 @@ export interface SerializedStopPoint {
 }
 export interface SerializedFrame {
   changes: SerializedChangeEvent[];
-  // selections: SerializedSelection[];
   position: number;
 }
 
@@ -61,13 +52,6 @@ function rehydrateRange([start, stop]: SerializedRange): vscode.Range {
   return new vscode.Range(rehydratePosition(start), rehydratePosition(stop));
 }
 
-function rehydrateSelection(serialized: SerializedSelection): vscode.Selection {
-  return new vscode.Selection(
-    rehydratePosition(serialized.anchor),
-    rehydratePosition(serialized.active)
-  );
-}
-
 function rehydrateChangeEvent(
   serialized: SerializedChangeEvent
 ): vscode.TextDocumentContentChangeEvent {
@@ -91,14 +75,12 @@ export function rehydrateBuffer(serialized: SerializedBuffer): buffers.Buffer {
     return {
       position: serialized.position,
       content: serialized.content,
-      language: serialized.language,
-      // selections: serialized.selections.map(rehydrateSelection)
+      language: serialized.language
     };
   }
 
   return {
     position: serialized.position,
     changes: serialized.changes.map(rehydrateChangeEvent),
-    // selections: serialized.selections.map(rehydrateSelection)
   };
 }

@@ -8,7 +8,6 @@ export default class Recorder {
   private _disposable: vscode.Disposable;
   private _textEditor: vscode.TextEditor | undefined;
   private _buffers = 0;
-  private _currentChanges: vscode.TextDocumentContentChangeEvent[] = [];
   private _storage: Storage;
   
   public static isAutoSave: boolean;
@@ -36,41 +35,26 @@ export default class Recorder {
       subscriptions
     );
 
-    // let e2 = vscode.window.onDidChangeTextEditorSelection(
-    //   this.onDidChangeTextEditorSelection,
-    //   this,
-    //   subscriptions
-    // );
-
     // For active editor change
-    let e3 = vscode.window.onDidChangeActiveTextEditor(
+    let e2 = vscode.window.onDidChangeActiveTextEditor(
       this.activeChange,
       this,
       subscriptions
     );
 
-    let e4 = vscode.workspace.onDidSaveTextDocument(
+    let e3 = vscode.workspace.onDidSaveTextDocument(
       this.activeChange,
       this,
       subscriptions
-    );
-
-    const save = vscode.commands.registerCommand(
-      "jevakallio.vscode-hacker-typer.saveMacro",
-      () => {
-        this.saveRecording(save);
-      }
     );
 
     // Why?
     this._textEditor = vscode.window.activeTextEditor;
     this._disposable = vscode.Disposable.from(
       ...subscriptions,
-      save,
       e1,
-      // e2,
-      e3,
-      e4
+      e2,
+      e3
     );
 
     if (this._textEditor) {
@@ -86,34 +70,8 @@ export default class Recorder {
     buffers.insert({
       position: this._buffers++,
       content,
-      language,
-      // selections
+      language
     });
-  }
-
-  private saveRecording(command: vscode.Disposable) {
-    vscode.window
-      .showInputBox({
-        prompt: "Give this thing a name",
-        placeHolder: "cool-macro"
-      })
-      .then(name => {
-        if (name) {
-          return this._storage
-            .save({
-              name,
-              description: "",
-              buffers: buffers.all()
-            })
-            .then(macro => {
-              console.log(
-                `Saved ${macro.buffers.length} buffers under "${macro.name}".`
-              );
-              command.dispose();
-              this.dispose();
-            });
-        }
-      });
   }
 
   private mySave(name: string) {
@@ -130,9 +88,8 @@ export default class Recorder {
     // store changes, selection change will commit
     // this._currentChanges.push(...e.contentChanges);
 
-    let changes = this._currentChanges;
+    let changes = e.contentChanges;
 
-    this._currentChanges = [];
     buffers.insert({
       changes,
       position: this._buffers++
@@ -142,35 +99,6 @@ export default class Recorder {
       this.activeChange();
     }
   }
-
-  // private onDidChangeTextEditorSelection(
-  //   e: vscode.TextEditorSelectionChangeEvent
-  // ) {
-  //   // @TODO: Gets called while playing -- need to stop recording once over
-
-  //   // Only allow recording to one active editor at a time
-  //   // Breaks when you leave but that's fine for now.
-
-  //   console.warn("selection change");
-
-  //   if (e.textEditor !== this._textEditor) {
-  //     return;
-  //   }
-
-  //   const changes = this._currentChanges;
-  //   const selections = e.selections || [];
-  //   this._currentChanges = [];
-
-  //   buffers.insert({
-  //     changes,
-  //     selections,
-  //     position: this._buffers++
-  //   });
-
-  //   if (buffers.count() >= 15) {
-  //     this.activeChange();
-  //   }
-  // }
 
   dispose() {
     if (this._disposable) {

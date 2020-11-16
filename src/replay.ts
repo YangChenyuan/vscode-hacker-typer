@@ -100,18 +100,7 @@ async function setStartingPoint(
     });
   }
 
-  if (editor) {
-    updateSelections(startingPoint.selections, editor);
-
-    // language should always be defined, guard statement here
-    // to support old recorded frames before language bit was added
-    if (startingPoint.language) {
-      // @TODO set editor language once the API becomes available:
-      // https://github.com/Microsoft/vscode/issues/1800
-    }
-  }
-
-  // move to next frame
+    // move to next frame
   currentBuffer = buffers.get(startingPoint.position + 1);
 }
 
@@ -149,15 +138,11 @@ export function onBackspace() {
 }
 
 function updateSelections(
-  selections: vscode.Selection[],
+  range: vscode.Range,
   editor: vscode.TextEditor
 ) {
-  editor.selections = selections;
-
-  // move scroll focus if needed
-  const { start, end } = editor.selections[0];
   editor.revealRange(
-    new vscode.Range(start, end),
+    range,
     vscode.TextEditorRevealType.InCenterIfOutsideViewport
   );
 }
@@ -185,13 +170,13 @@ function advanceBuffer(done: () => void, userInput: string) {
     return done();
   }
 
-  const { changes, selections } = <buffers.Frame>buffer;
+  const { changes } = <buffers.Frame>buffer;
 
   const  updateSelectionAndAdvanceToNextBuffer = () => {
-    if (selections.length) {
-      updateSelections(selections, editor);
+    if (changes?.[0]?.range) {
+      updateSelections(changes[0].range, editor);
     }
-      
+
     let position = buffer.position;
     currentBuffer = buffers.get(buffer.position + 1);
 
